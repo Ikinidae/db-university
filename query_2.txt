@@ -1,0 +1,81 @@
+JOIN
+
+1.
+SELECT students.name, students.surname, students.degree_id, degrees.name FROM `students`
+JOIN `degrees`
+ON students.degree_id = degrees.id
+WHERE degrees.name = "Corso di Laurea in Economia";
+
+2.
+SELECT degrees.name, degrees.department_id, departments.name FROM `degrees`
+JOIN `departments`
+ON degrees.department_id = departments.id
+WHERE departments.name = 'Dipartimento di Neuroscienze'
+AND degrees.level = 'Magistrale';
+
+3.
+SELECT course_teacher.*, courses.name, courses.id, teachers.id, teachers.name, teachers.surname FROM `course_teacher`
+JOIN `courses` ON courses.id = course_teacher.course_id
+JOIN `teachers` ON teachers.id = course_teacher.teacher_id
+WHERE teachers.id = 44;
+
+4.
+SELECT students.name, students.surname, degrees.*, departments.* FROM `students`
+JOIN degrees ON degrees.id = students.degree_id
+JOIN departments ON departments.id = degrees.department_id
+ORDER BY `students`.`name` ASC;
+
+5.
+SELECT degrees.name as corso_di_laurea, courses.name as corso, courses.period, courses.year, teachers.name, teachers.surname
+FROM degrees
+JOIN courses ON degrees.id = courses.degree_id
+JOIN course_teacher ON courses.id = course_teacher.course_id
+JOIN teachers ON course_teacher.teacher_id = teachers.id;
+
+6.
+SELECT DISTINCT teachers.*, departments.name
+FROM teachers
+JOIN course_teacher ON teachers.id = course_teacher.teacher_id
+JOIN courses ON course_teacher.course_id = courses.id
+JOIN degrees ON courses.degree_id = degrees.id
+JOIN departments ON degrees.department_id = departments.id
+WHERE departments.name = 'Dipartimento di Matematica'
+ORDER BY teachers.surname, teachers.name ASC;
+
+7.
+SELECT students.surname, students.name, students.registration_number, courses.id as id_corso, courses.name as corso,  COUNT(courses.id) as numero_tentativi
+FROM students
+	JOIN exam_student ON students.id = exam_student.student_id
+    JOIN exams ON exam_student.exam_id = exams.id
+    JOIN courses ON exams.course_id = courses.id
+GROUP BY courses.id, students.registration_number, students.name, students.surname
+ORDER BY students.surname, students.name ASC;
+
+// versione con voto finale e numero di tentativi falliti (esclusi esami non superati)
+SELECT students.surname, students.name, students.registration_number, courses.id as id_corso, courses.name as corso,  COUNT(courses.id - 1) as numero_tentativi_falliti, MAX(exam_student.vote) as voto
+FROM students
+	JOIN exam_student ON students.id = exam_student.student_id
+    JOIN exams ON exam_student.exam_id = exams.id
+    JOIN courses ON exams.course_id = courses.id
+GROUP BY courses.id, students.registration_number, students.name, students.surname
+HAVING voto > 17
+ORDER BY students.surname, students.name ASC;
+
+
+
+GROUP BY
+1.
+SELECT COUNT(id) AS number, YEAR(`enrolment_date`) AS years FROM `students`
+GROUP BY YEAR(`enrolment_date`);
+
+2.
+SELECT COUNT(id) AS number, `office_address` AS office FROM `teachers`
+GROUP BY `office_address`;
+
+3.
+SELECT ROUND(AVG(vote)) as vote, exam_id AS exam_id FROM `exam_student`
+GROUP BY exam_id;
+
+4.
+SELECT COUNT(id) AS number, department_id AS departments FROM `degrees`
+GROUP BY department_id;
